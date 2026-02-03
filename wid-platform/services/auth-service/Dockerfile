@@ -1,24 +1,26 @@
-FROM golang:1.21-alpine AS builder
+
+# Stage 1: Build the NestJS application
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Create a go.sum file so the Docker build doesn't fail
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+COPY package*.json ./
+RUN npm install
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/auth-service .
+RUN npm run build
 
-FROM alpine:latest
+# Stage 2: Run the application
+FROM node:20-alpine
 
-RUN apk --no-cache add ca-certificates
+WORKDIR /app
 
-WORKDIR /root/
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
 
-COPY --from=builder /app/auth-service .
+ENV PORT=3001
+EXPOSE 3001
 
-EXPOSE 8080
-
-CMD ["./auth-service"]
+CMD ["npm", "run", "start:prod"]

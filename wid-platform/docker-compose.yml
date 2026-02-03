@@ -1,139 +1,150 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: wid_postgres
+  # Frontend Service
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - wid-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - VITE_API_URL=http://localhost:3000/api
+    depends_on:
+      - api-gateway
 
-  redis:
-    image: redis:7-alpine
-    container_name: wid_redis
-    ports:
-      - "${REDIS_PORT}:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD:-}
-    networks:
-      - wid-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # API Gateway Service
   api-gateway:
     build:
-      context: ./services/api-gateway
+      context: ./apps/api-gateway
       dockerfile: Dockerfile
-    container_name: wid_api_gateway
     ports:
-      - "${API_GATEWAY_PORT}:8080"
-    env_file: .env
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      # Add environment variables for routing to backend services
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - USER_PROFILE_SERVICE_URL=http://user-profile-service:3002
+      - ASSET_VAULT_SERVICE_URL=http://asset-vault-service:3003
+      - INHERITANCE_RULES_SERVICE_URL=http://inheritance-rules-service:3004
+      - DEATH_VERIFICATION_SERVICE_URL=http://death-verification-service:3005
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3006
     depends_on:
       - auth-service
       - user-profile-service
-    networks:
-      - wid-network
+      - asset-vault-service
+      - inheritance-rules-service
+      - death-verification-service
+      - notification-service
 
+  # Auth Service
   auth-service:
     build:
       context: ./services/auth-service
       dockerfile: Dockerfile
-    container_name: wid_auth_service
-    ports:
-      - "${AUTH_SERVICE_PORT}:8080"
-    env_file: .env
+    environment:
+      - PORT=3001
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=auth_db
+      - JWT_SECRET=supersecretjwtkeythatshouldbemoresecureinproduction
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - wid-network
+      - postgres
 
+  # User Profile Service
   user-profile-service:
     build:
       context: ./services/user-profile-service
       dockerfile: Dockerfile
-    container_name: wid_user_profile_service
-    ports:
-      - "${USER_PROFILE_SERVICE_PORT}:8080"
-    env_file: .env
+    environment:
+      - PORT=3002
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=user_profile_db
     depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - wid-network
+      - postgres
 
+  # Asset Vault Service
   asset-vault-service:
     build:
       context: ./services/asset-vault-service
       dockerfile: Dockerfile
-    container_name: wid_asset_vault_service
-    ports:
-      - "${ASSET_VAULT_SERVICE_PORT}:8080"
-    env_file: .env
+    environment:
+      - PORT=3003
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=asset_vault_db
     depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - wid-network
+      - postgres
 
+  # Inheritance Rules Service
   inheritance-rules-service:
     build:
       context: ./services/inheritance-rules-service
       dockerfile: Dockerfile
-    container_name: wid_inheritance_rules_service
-    ports:
-      - "${INHERITANCE_RULES_SERVICE_PORT}:8080"
-    env_file: .env
+    environment:
+      - PORT=3004
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=inheritance_rules_db
     depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - wid-network
+      - postgres
 
+  # Death Verification Service
   death-verification-service:
     build:
       context: ./services/death-verification-service
       dockerfile: Dockerfile
-    container_name: wid_death_verification_service
-    ports:
-      - "${DEATH_VERIFICATION_SERVICE_PORT}:8080"
-    env_file: .env
-    networks:
-      - wid-network
+    environment:
+      - PORT=3005
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=death_verification_db
+    depends_on:
+      - postgres
 
+  # Notification Service
   notification-service:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
-    container_name: wid_notification_service
-    ports:
-      - "${NOTIFICATION_SERVICE_PORT}:8080"
-    env_file: .env
+    environment:
+      - PORT=3006
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=notification_db
     depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - wid-network
+      - postgres
 
-networks:
-  wid-network:
-    driver: bridge
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=auth_db # Default DB, individual services connect to their own
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis Cache/Queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:
