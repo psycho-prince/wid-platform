@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: wid_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wid-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: wid_redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-}
+    networks:
+      - wid-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: wid_api_gateway
+    ports:
+      - "${API_GATEWAY_PORT}:8080"
+    env_file: .env
+    depends_on:
+      - auth-service
+      - user-profile-service
+    networks:
+      - wid-network
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: wid_auth_service
+    ports:
+      - "${AUTH_SERVICE_PORT}:8080"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - wid-network
+
+  user-profile-service:
+    build:
+      context: ./services/user-profile-service
+      dockerfile: Dockerfile
+    container_name: wid_user_profile_service
+    ports:
+      - "${USER_PROFILE_SERVICE_PORT}:8080"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wid-network
+
+  asset-vault-service:
+    build:
+      context: ./services/asset-vault-service
+      dockerfile: Dockerfile
+    container_name: wid_asset_vault_service
+    ports:
+      - "${ASSET_VAULT_SERVICE_PORT}:8080"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wid-network
+
+  inheritance-rules-service:
+    build:
+      context: ./services/inheritance-rules-service
+      dockerfile: Dockerfile
+    container_name: wid_inheritance_rules_service
+    ports:
+      - "${INHERITANCE_RULES_SERVICE_PORT}:8080"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wid-network
+
+  death-verification-service:
+    build:
+      context: ./services/death-verification-service
+      dockerfile: Dockerfile
+    container_name: wid_death_verification_service
+    ports:
+      - "${DEATH_VERIFICATION_SERVICE_PORT}:8080"
+    env_file: .env
+    networks:
+      - wid-network
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    container_name: wid_notification_service
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:8080"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - wid-network
+
+networks:
+  wid-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

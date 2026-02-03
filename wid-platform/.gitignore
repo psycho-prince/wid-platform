@@ -1,0 +1,46 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, build artifacts
+*.test
+*.out
+/build
+/dist
+/bin
+
+# Dependency directories
+/vendor/
+/node_modules/
+
+# Go build cache
+/pkg/
+/bin/
+
+# IDE settings and cache
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*.local
+.env.local
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
