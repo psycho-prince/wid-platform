@@ -1,15 +1,16 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/user.entity';
+import { HmacAuthMiddleware } from './common/middleware/hmac-auth.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule available everywhere
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -18,12 +19,20 @@ import { User } from './user/user.entity';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User], // Register your entities here
-      synchronize: true, // In production, this should be false and migrations should be used
+      entities: [User],
+      synchronize: true,
     }),
     AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply HmacAuthMiddleware to all routes. The middleware itself will decide
+    // if verification is needed based on headers.
+    consumer
+      .apply(HmacAuthMiddleware)
+      .forRoutes('*');
+  }
+}

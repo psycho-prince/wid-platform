@@ -1,8 +1,8 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs'; // Using bcryptjs
 import { UserService } from './user.service';
+import { AuthResponse } from '@wid-platform/contracts';
 
 @Injectable()
 export class AuthService {
@@ -11,10 +11,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(email: string, passwordPlain: string): Promise<any> {
+  async register(email: string, passwordPlain: string): Promise<AuthResponse> {
     const hashedPassword = await bcrypt.hash(passwordPlain, 10);
     const user = await this.userService.createUser(email, hashedPassword);
-    // Optionally generate token upon registration
     const payload = { email: user.email, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
@@ -30,7 +29,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any): Promise<AuthResponse> {
     const payload = { email: user.email, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),

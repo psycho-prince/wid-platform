@@ -1,3 +1,4 @@
+
 version: '3.8'
 
 services:
@@ -29,6 +30,8 @@ services:
       - INHERITANCE_RULES_SERVICE_URL=http://inheritance-rules-service:3004
       - DEATH_VERIFICATION_SERVICE_URL=http://death-verification-service:3005
       - NOTIFICATION_SERVICE_URL=http://notification-service:3006
+      - AUDIT_SERVICE_URL=http://audit-service:3007
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - auth-service
       - user-profile-service
@@ -36,6 +39,7 @@ services:
       - inheritance-rules-service
       - death-verification-service
       - notification-service
+      - audit-service # Depend on audit service
 
   # Auth Service
   auth-service:
@@ -50,6 +54,7 @@ services:
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=auth_db
       - JWT_SECRET=supersecretjwtkeythatshouldbemoresecureinproduction
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 
@@ -65,6 +70,7 @@ services:
       - DATABASE_USER=user
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=user_profile_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 
@@ -80,6 +86,7 @@ services:
       - DATABASE_USER=user
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=asset_vault_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 
@@ -95,6 +102,7 @@ services:
       - DATABASE_USER=user
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=inheritance_rules_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 
@@ -110,6 +118,7 @@ services:
       - DATABASE_USER=user
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=death_verification_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 
@@ -125,6 +134,23 @@ services:
       - DATABASE_USER=user
       - DATABASE_PASSWORD=password
       - DATABASE_NAME=notification_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
+    depends_on:
+      - postgres
+
+  # Audit Service
+  audit-service:
+    build:
+      context: ./services/audit-service
+      dockerfile: Dockerfile
+    environment:
+      - PORT=3007
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=user
+      - DATABASE_PASSWORD=password
+      - DATABASE_NAME=audit_db
+      - INTERNAL_SERVICE_SECRET=supersecretinternalsharedkey
     depends_on:
       - postgres
 

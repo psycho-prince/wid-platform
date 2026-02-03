@@ -1,0 +1,23 @@
+
+{
+  "name": "@wid-platform/contracts",
+  "version": "1.0.0",
+  "description": "Shared API contracts for WID Platform using Zod",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "wid",
+    "contracts",
+    "zod"
+  ],
+  "author": "Gemini",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.x",
+    "zod": "^3.x"
+  }
+}

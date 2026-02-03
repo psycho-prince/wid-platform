@@ -1,16 +1,10 @@
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-type LoginSchema = z.infer<typeof loginSchema>;
+import { LoginUserRequestSchema, AuthError, AuthResponse } from '@wid-platform/contracts'; // Import from contracts
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -18,25 +12,24 @@ const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginSchema>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<LoginUserRequestSchema>({
+    resolver: zodResolver(LoginUserRequestSchema), // Use Zod schema for validation
   });
 
-  const mutation = useMutation({
-    mutationFn: (data: LoginSchema) => api.post('/auth/login', data),
+  const mutation = useMutation<AuthResponse, Error, LoginUserRequestSchema>({
+    mutationFn: (data: LoginUserRequestSchema) => api.post('/auth/login', data),
     onSuccess: (response) => {
-      // In a real app, the token would come from the response
-      localStorage.setItem('token', response.data.accessToken);
+      localStorage.setItem('token', response.accessToken); // Use accessToken from AuthResponse
       navigate('/');
     },
     onError: (error) => {
-      // Handle error (e.g., show a toast notification)
+      // Handle error based on AuthError enum (if API sends it)
       console.error('Login failed:', error);
       alert('Login failed. Please check your credentials.');
     },
   });
 
-  const onSubmit = (data: LoginSchema) => {
+  const onSubmit = (data: LoginUserRequestSchema) => {
     mutation.mutate(data);
   };
 

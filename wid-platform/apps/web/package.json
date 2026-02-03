@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/forms": "^0.5.11",
     "@tanstack/react-query": "^5.90.20",
+    "@wid-platform/contracts": "file:../../packages/contracts",
     "autoprefixer": "^10.4.24",
     "axios": "^1.13.4",
     "clsx": "^2.1.1",

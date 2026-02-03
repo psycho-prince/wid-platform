@@ -1,20 +1,20 @@
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport'; // Import PassportModule
+import { PassportModule } from '@nestjs/passport';
 import { User } from '../user/user.entity';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { LocalStrategy } from './local.strategy'; // Import LocalStrategy
+import { LocalStrategy } from './local.strategy';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe'; // Import ZodValidationPipe
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    PassportModule, // Include PassportModule
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -25,7 +25,13 @@ import { LocalStrategy } from './local.strategy'; // Import LocalStrategy
     }),
     ConfigModule,
   ],
-  providers: [AuthService, UserService, JwtStrategy, LocalStrategy], // Add LocalStrategy here
+  providers: [
+    AuthService,
+    UserService,
+    JwtStrategy,
+    LocalStrategy,
+    ZodValidationPipe, // Add ZodValidationPipe to providers
+  ],
   controllers: [AuthController],
   exports: [AuthService, UserService, JwtModule],
 })

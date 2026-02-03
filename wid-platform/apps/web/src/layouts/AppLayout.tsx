@@ -1,4 +1,3 @@
-
 import { NavLink, Outlet } from 'react-router-dom';
 import clsx from 'clsx';
 
@@ -7,6 +6,7 @@ const navigation = [
   { name: 'Asset Vault', href: '/assets' },
   { name: 'Inheritance Rules', href: '/inheritance' },
   { name: 'Account & Security', href: '/account' },
+  { name: 'Audit Log', href: '/audit' }, // Add Audit Log link
 ];
 
 const AppLayout = () => {

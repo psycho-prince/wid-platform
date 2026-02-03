@@ -4,17 +4,20 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import api from '../services/api';
+import { RegisterUserRequestSchema, AuthError, AuthResponse } from '@wid-platform/contracts';
 
-const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
+// Augment the RegisterUserRequestSchema with confirmPassword and terms agreement for client-side validation
+const RegisterFormSchema = RegisterUserRequestSchema.extend({
   confirmPassword: z.string(),
+  termsAgreed: z.boolean().refine(val => val === true, {
+    message: "You must agree to the Terms and Conditions",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
 });
 
-type RegisterSchema = z.infer<typeof registerSchema>;
+type RegisterFormType = z.infer<typeof RegisterFormSchema>;
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -22,15 +25,21 @@ const RegisterPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterSchema>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<RegisterFormType>({
+    resolver: zodResolver(RegisterFormSchema),
   });
 
-  const mutation = useMutation({
-    mutationFn: (data: RegisterSchema) => api.post('/auth/register', data),
+  const mutation = useMutation<AuthResponse, Error, RegisterFormType>({
+    mutationFn: (data: RegisterFormType) => api.post('/auth/register', {
+      email: data.email,
+      password: data.password,
+      // In a real application, the termsAgreed timestamp would be sent to the backend
+      // and stored with the user's consent.
+      metadata: {
+        termsAgreedAt: data.termsAgreed ? new Date().toISOString() : null,
+      },
+    }),
     onSuccess: () => {
-      // In a real app, you might want to automatically log the user in
-      // or show a "please check your email to verify" message.
       alert('Registration successful! Please log in.');
       navigate('/login');
     },
@@ -40,7 +49,7 @@ const RegisterPage = () => {
     },
   });
 
-  const onSubmit = (data: RegisterSchema) => {
+  const onSubmit = (data: RegisterFormType) => {
     mutation.mutate(data);
   };
 
@@ -104,6 +113,26 @@ const RegisterPage = () => {
               </p>
             )}
           </div>
+          <div className="mb-6 flex items-center">
+            <input
+              id="termsAgreed"
+              type="checkbox"
+              {...register('termsAgreed')}
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <label
+              htmlFor="termsAgreed"
+              className="ml-2 block text-sm text-gray-900"
+            >
+              I agree to the{' '}
+              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Terms and Conditions
+              </a>
+            </label>
+          </div>
+          {errors.termsAgreed && (
+              <p className="mt-2 text-sm text-red-600">{errors.termsAgreed.message}</p>
+          )}
           <button
             type="submit"
             disabled={mutation.isLoading}

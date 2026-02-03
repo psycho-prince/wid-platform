@@ -11,6 +11,15 @@ WID is a Zero-Trust digital legacy and inheritance platform designed to securely
 *   **Enterprise-grade Repo Structure:** Monorepo design for efficient development and deployment of multiple services.
 *   **Investor-demo Ready:** The codebase and infrastructure are structured for clear demonstration of functionality and future potential.
 
+## Legal & Audit Philosophy
+
+The WID platform is "legally defensible by design". This means:
+*   **Immutable Audit Trail**: All critical actions and decisions are recorded in a tamper-proof, append-only audit log with cryptographic hashing, providing an undeniable record of events.
+*   **Explicit Consent**: User consent for critical actions (e.g., terms of service, inheritance rule creation) is explicitly captured and timestamped, ensuring legal compliance and accountability.
+*   **Transparency**: While data is secure, the process and status of death verification and inheritance execution are transparently presented to relevant parties (users, heirs, administrators) through auditable interfaces.
+*   **Accountability**: Every action in the system is attributable to an actor (user, system, admin) and linked via correlation IDs, ensuring full accountability.
+*   **Clear State Management**: Critical business flows, like death verification, are managed via explicit state machines with immutable logging of state transitions.
+
 ## Tech Stack
 
 ### Backend
@@ -52,7 +61,11 @@ wid-platform/
 │   ├── asset-vault-service/    # Stores metadata of user's digital assets
 │   ├── inheritance-rules-service/ # Defines and manages inheritance logic
 │   ├── death-verification-service/ # Stubs for external death verification (pluggable)
-│   └── notification-service/   # Handles user notifications (email, SMS, etc.)
+│   ├── notification-service/   # Handles user notifications (email, SMS, etc.)
+│   └── audit-service/          # Dedicated immutable audit log
+│
+├── packages/
+│   └── contracts/              # Shared Zod schemas for API interfaces
 │
 ├── infra/
 │   ├── docker/                 # Docker-related configurations and helper scripts
@@ -63,6 +76,59 @@ wid-platform/
 ├── .env.example                # Example environment variables
 └── .gitignore                  # Specifies intentionally untracked files to ignore
 ```
+
+## Security Architecture Overview (ASCII Diagram)
+
+```
++------------------+     +--------------------+     +---------------------------------------------------------------------------------------+
+|   Client Device  |     |   API Gateway      |     |                                Internal Microservices (HMAC Protected)                |
+| (Web Browser)    |     | (NestJS / Docker)  |     |                                                                                       |
++--------+---------+     +----------+---------+     +-------------------+ +-------------------+ +-------------------+ +-------------------+
+         | HTTPS          |          | JWT Verify/Rate Limit            | |                   | |                   | |                   |
+         |                |          | Audit Logging (Request/Response) | |                   | |                   | |                   |
+         |                |          | Correlation ID Generation        | |                   | |                   | |                   |
+         |                |          | HMAC Sign Internal Request       | |                   | |                   | |                   |
+         v                v          |                                  | |                   | |                   | |                   |
++--------+----------------+----------+----------------------------------+ |                   | |                   | |                   |
+| Frontend (React / Nginx) |          |                                  | |                   | |                   | |                   |
+| - User Input Validation  |          | (Proxies & Adds Headers)         | |                   | |                   | |                   |
+| - Legal-Safe UX          |<---------|----------------------------------| |                   | |                   | |                   |
++--------------------------+          |              ^ Internal HMAC Signed Request (X-User-Id, X-User-Email, X-Correlation-Id)              |
+                                      |              |                                     |                   | |                   |
+                                      +--------------+-------------------------------------+-------------------+ +-------------------+
+                                                     |                                     |                   | |                   |
+                                                     v                                     v                   v v                   v
+                                                +----+--------+                     +----+--------+       +----+--------+       +----+--------+
+                                                | Auth Service|                     | Audit Service |       | Death Ver.  |       | Other        |
+                                                | (NestJS)    |                     | (NestJS)      |       | Service     |       | Services     |
+                                                | - JWT Sign  |                     | - Append-only |       | (NestJS)    |       | (NestJS)     |
+                                                | - User Auth |<-------------------->| Audit Log     |<------>| - State Mchn|       | - Stubs      |
+                                                +-------------+                     +---------------+       | - Orchestr.|       | - HMAC Verify|
+                                                      |                                     |                   +-------------+       +--------------+
+                                                      | (Private Network)                   |                               |
+                                                      v                                     v                               v
+                                                +-----+------+                      +-----+------+                       +-----+------+
+                                                | PostgreSQL |                      | PostgreSQL |                       | PostgreSQL |
+                                                | (Auth DB)  |                      | (Audit DB) |                       | (Other DBs)|
+                                                +------------+                      +------------+                       +------------+
+                                                                                    ^                                      ^
+                                                                                    |                                      |
+                                                                                    | Internal Calls (HMAC Signed)         | Internal Calls (HMAC Signed)
+                                                                                    +--------------------------------------+
+```
+
+## End-to-End MVP Flow: Death Verification → Inheritance Execution
+
+This MVP demonstrates a critical, legally defensible business flow:
+1.  **Death Verification Request**: A user (or authorized party) initiates a request for death verification, potentially by providing supporting documentation (MVP: simulated data). The request enters `unverified` or `pending_review` state.
+2.  **Admin Review**: An administrator or automated system reviews the verification request. This can include manual override. The decision (verified/rejected) is immutably logged.
+3.  **Verification Event**: Upon `verified` status, the `death-verification-service` emits an internal event (MVP: direct service calls).
+4.  **Rule Evaluation**: The `inheritance-rules-service` is triggered. It evaluates all active inheritance rules for the deceased user.
+5.  **Asset Release**: The `asset-vault-service` is instructed to mark the user's digital assets as `releasable`, making them available for inheritance according to rules.
+6.  **Notifications**: The `notification-service` sends out relevant notifications (e.g., to designated heirs, system administrators).
+7.  **Comprehensive Audit**: Every step of this flow, from request creation, status changes, rule evaluation, asset marking, and notifications, generates immutable audit log entries in the dedicated `audit-service`. These entries include actor, action, target, and a correlation ID linking the entire process.
+
+This flow is designed to be **idempotent**, **logged**, and **visible in the UI** (through audit trail and future state indicators), ensuring legal defensibility and auditability.
 
 ## Local Setup
 
@@ -98,74 +164,38 @@ To run the WID platform locally using Docker Compose, follow these steps:
 *   If you encounter issues during `docker-compose up`, try rebuilding with `docker-compose down -v --remove-orphans && docker-compose up --build`.
 *   Check Docker container logs for specific error messages: `docker-compose logs <service_name>`.
 
-## Security Model
-
-The WID platform adheres to a strict Zero-Trust security model. Key aspects include:
-
-*   **Authentication & Authorization:** All API endpoints require authentication via JWT. Authorization checks (e.g., RBAC or ABAC) are performed at the service level, enforced by the API Gateway.
-*   **Data Encryption:** All sensitive data, both in transit and at rest, is encrypted. (Currently implemented for passwords, future scope for asset encryption).
-*   **Input Validation:** Strict input validation (e.g., using Zod on the frontend, DTO validation on the backend) is applied at all layers to prevent common vulnerabilities like injection attacks.
-*   **Secure Communication:** Internal service-to-service communication within the Docker network is assumed to be trusted for local development but will be secured with mutual TLS (mTLS) in production environments.
-*   **Least Privilege:** Each service and database user operates with the minimum necessary permissions.
-*   **No Secrets in Frontend:** API keys, database credentials, and other sensitive information are strictly confined to backend services and environment variables.
-*   **Auditing and Logging:** Comprehensive logging of security-relevant events for auditability and incident response.
-
-## Threat Model (STRIDE-style)
-
-This preliminary threat model identifies potential vulnerabilities using the STRIDE categories:
-
-*   **Spoofing:**
-    *   Compromised JWT tokens allowing unauthorized access.
-    *   Impersonation of legitimate users or services through stolen credentials.
-*   **Tampering:**
-    *   Unauthorized modification of asset metadata or inheritance rules.
-    *   Manipulation of API requests to bypass validation or authorization.
-    *   Database tampering due to SQL injection or unauthorized access.
-*   **Repudiation:**
-    *   Users denying actions they performed (e.g., setting an inheritance rule). Comprehensive logging is crucial.
-    *   Services denying having processed a request.
-*   **Information Disclosure:**
-    *   Exposure of sensitive user data (e.g., personal details, asset metadata) through insecure APIs or logs.
-    *   Leakage of JWT secrets or database credentials.
-    *   Side-channel attacks on encrypted assets.
-*   **Denial of Service (DoS):**
-    *   API flooding or resource exhaustion attacks targeting any service.
-    *   Database connection pooling attacks.
-    *   Frontend attacks rendering the application unusable.
-*   **Elevation of Privilege:**
-    *   Regular users gaining administrative privileges.
-    *   One microservice gaining unauthorized access to another service's data or functionality.
-
-## Future Roadmap (MVP → v1)
+## Future Roadmap (MVP vs. V1 Boundaries)
 
 ### Minimum Viable Product (MVP) - (Current State)
-*   **User Authentication:** Register, Login, JWT issuance.
-*   **Basic User Profile:** Placeholder for user data.
-*   **Asset Vault (Metadata Only):** List mock assets.
-*   **Inheritance Rules (Stubbed):** Basic form for rule creation (heir, delay, condition).
-*   **Core Infrastructure:** Dockerized services, `docker-compose` for local dev, PostgreSQL, Redis.
-*   **React Frontend:** Basic navigation, protected routes, form handling.
-*   **API Gateway:** Routes to core services.
+The current state is a **fully functional, security-hardened, and audit-ready MVP** that demonstrates the core "Death Verification → Inheritance Execution" flow.
 
-### Version 1 (V1) - Key Enhancements
+*   **Shared Contracts:** Centralized Zod schemas for API interfaces in `packages/contracts`.
+*   **Zero-Trust API Gateway:** JWT verification, user identity extraction, correlation ID generation, HMAC signing for internal requests, rate limiting, and centralized error handling.
+*   **Real Business Flow (Death Verification)**: `death-verification-service` with state machine (`unverified`, `pending_review`, `verified`, `rejected`), admin override, and orchestration of downstream services upon `verified` status.
+*   **First-Class Audit Log:** Dedicated `audit-service` with append-only immutable logs, cryptographic hashing, and a read-only API. Gateway-enforced audit logging for requests/responses/errors.
+*   **Legal-Safe UX:** Frontend with explicit consent capture (Terms & Conditions), irreversible action confirmations (delete asset/rule), and a read-only audit timeline UI.
+*   **Security Baseline:** HMAC authentication for all internal service communication. Minimal integration tests for auth and death verification flow. Updated `SECURITY.md` with threat assumptions, trust boundaries, and key management notes.
+*   **Full Observability Foundation**: Correlation IDs propagated across services.
+
+### Version 1 (V1) - Key Enhancements (Beyond MVP)
 *   **Robust User Management:** Password reset, email verification, multi-factor authentication (MFA).
-*   **Full User Profile Management:** CRUD operations for user details, preferences.
-*   **Secure Asset Storage (Full):** Integration with a secure, encrypted storage solution (e.g., IPFS, dedicated vault service) for actual digital assets. Placeholder for actual crypto.
+*   **Full User Profile Management:** CRUD operations for user details, preferences (`user-profile-service`).
+*   **Secure Asset Storage (Full):** Integration with a secure, encrypted storage solution (e.g., IPFS, dedicated vault service) for actual digital assets. Client-side encryption.
 *   **Advanced Inheritance Rules:** Complex rule definitions, conditional releases, heir management.
 *   **Death Verification Integration:** Actual integration with external death verification APIs/services.
-*   **Notification System:** Email/SMS notifications for critical events (e.g., asset release, rule changes).
-*   **Admin Panel:** For platform administration, monitoring, and auditing.
-*   **Observability:** Centralized logging, monitoring (Prometheus/Grafana), tracing (Jaeger).
+*   **Notification System:** Full implementation for email/SMS notifications (`notification-service`).
+*   **Admin Panel:** Comprehensive UI for platform administration, monitoring, and auditing.
+*   **Observability:** Full integration with monitoring (Prometheus/Grafana), tracing (Jaeger).
 *   **Deployment Automation:** Terraform for cloud infrastructure provisioning, CI/CD pipelines.
-*   **Enhanced Security:** mTLS for inter-service communication, robust secrets management.
+*   **Enhanced Security:** mTLS for inter-service communication, robust secrets management (Vault/KMS).
 *   **Frontend Polish:** Improved UI/UX, detailed asset views, real-time updates.
+*   **Authorization:** Implement Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC).
 
 ## Explicit TODO Section
 
 *   **Backend Services (General):**
-    *   Implement DTOs (Data Transfer Objects) and validation for all API endpoints.
+    *   Implement DTOs (Data Transfer Objects) and validation for all API endpoints (where not already done).
     *   Implement proper error handling and logging across all services.
-    *   Implement service-to-service authentication (e.g., using API keys or mTLS).
     *   Add comprehensive unit and integration tests for all services.
     *   Implement Redis for caching and/or queuing where appropriate (e.g., notification queue).
     *   Configure CORS appropriately for all services.
@@ -181,15 +211,16 @@ This preliminary threat model identifies potential vulnerabilities using the STR
 
 *   **`asset-vault-service`:**
     *   Implement metadata storage and retrieval.
-    *   Define `Asset` entity (name, description, ownerId, encrypted_key_location, etc.).
+    *   Implement CRUD for assets.
     *   Placeholder for actual encrypted asset storage integration.
 
 *   **`inheritance-rules-service`:**
-    *   Implement CRUD for inheritance rules (e.g., beneficiaries, conditions, timelines).
+    *   Implement full CRUD for inheritance rules.
     *   Connect to PostgreSQL and define `InheritanceRule` entity.
 
 *   **`death-verification-service`:**
-    *   Implement a more realistic stub or integrate with a mock external service.
+    *   Implement admin/manual override path in UI.
+    *   Implement integration with a mock external death verification service.
 
 *   **`notification-service`:**
     *   Implement email sending (e.g., SendGrid, Nodemailer).
@@ -197,15 +228,13 @@ This preliminary threat model identifies potential vulnerabilities using the STR
     *   Connect to Redis for message queueing.
 
 *   **Frontend (`apps/web`):**
-    *   Implement full functionality for Asset Vault, Inheritance Rules, and Account & Security pages.
-    *   Integrate React Query hooks with all backend API calls.
+    *   Implement full functionality for Asset Vault, Inheritance Rules, and Account & Security pages, integrating with backend APIs.
     *   Enhance UI/UX and visual design using Tailwind CSS.
     *   Add error boundaries and global error handling.
     *   Implement proper loading states and feedback for all asynchronous operations.
     *   Implement a logout functionality that clears the JWT token.
+    *   Implement admin interface for death verification.
 
 *   **Infrastructure:**
     *   Refine `docker-compose.yml` for production-like environments (e.g., resource limits, health checks).
     *   Implement `infra/terraform` skeleton for basic cloud setup (e.g., VPC, EKS/ECS, RDS).
-
-This README provides a comprehensive overview and a clear path forward for the WID platform.
