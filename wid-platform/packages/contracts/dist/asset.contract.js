@@ -1,43 +1,40 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssetError = exports.ListAssetsResponseSchema = exports.AssetResponseSchema = exports.GetAssetRequestSchema = exports.UpdateAssetRequestSchema = exports.CreateAssetRequestSchema = void 0;
-const zod_1 = require("zod");
+import { z } from 'zod';
 // --- Requests ---
-exports.CreateAssetRequestSchema = zod_1.z.object({
-    name: zod_1.z.string().min(1),
-    description: zod_1.z.string().optional(),
-    type: zod_1.z.string().min(1), // e.g., 'crypto', 'document', 'social_media_account'
-    encryptedDetails: zod_1.z.string(), // Placeholder for encrypted asset details
-    ownerId: zod_1.z.string().uuid(),
+export const CreateAssetRequestSchema = z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+    type: z.string().min(1), // e.g., 'crypto', 'document', 'social_media_account'
+    encryptedDetails: z.string(), // Placeholder for encrypted asset details
+    ownerId: z.string().uuid(),
 });
-exports.UpdateAssetRequestSchema = zod_1.z.object({
-    assetId: zod_1.z.string().uuid(),
-    name: zod_1.z.string().min(1).optional(),
-    description: zod_1.z.string().optional(),
-    type: zod_1.z.string().min(1).optional(),
-    encryptedDetails: zod_1.z.string().optional(),
+export const UpdateAssetRequestSchema = z.object({
+    assetId: z.string().uuid(),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    type: z.string().min(1).optional(),
+    encryptedDetails: z.string().optional(),
 });
-exports.GetAssetRequestSchema = zod_1.z.object({
-    assetId: zod_1.z.string().uuid(),
-    ownerId: zod_1.z.string().uuid().optional(), // OwnerId for authorization
+export const GetAssetRequestSchema = z.object({
+    assetId: z.string().uuid(),
+    ownerId: z.string().uuid().optional(), // OwnerId for authorization
 });
 // --- Responses ---
-exports.AssetResponseSchema = zod_1.z.object({
-    id: zod_1.z.string().uuid(),
-    name: zod_1.z.string(),
-    description: zod_1.z.string().nullable(),
-    type: zod_1.z.string(),
-    encryptedDetails: zod_1.z.string(), // Still encrypted
-    ownerId: zod_1.z.string().uuid(),
-    isReleasable: zod_1.z.boolean(), // Indicates if ready for inheritance
-    createdAt: zod_1.z.string().datetime(),
-    updatedAt: zod_1.z.string().datetime(),
+export const AssetResponseSchema = z.object({
+    id: z.string().uuid(),
+    name: z.string(),
+    description: z.string().nullable(),
+    type: z.string(),
+    encryptedDetails: z.string(), // Still encrypted
+    ownerId: z.string().uuid(),
+    isReleasable: z.boolean(), // Indicates if ready for inheritance
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
 });
-exports.ListAssetsResponseSchema = zod_1.z.array(exports.AssetResponseSchema);
+export const ListAssetsResponseSchema = z.array(AssetResponseSchema);
 // --- Errors ---
-var AssetError;
+export var AssetError;
 (function (AssetError) {
     AssetError["ASSET_NOT_FOUND"] = "ASSET_NOT_FOUND";
     AssetError["INVALID_DATA"] = "INVALID_DATA";
     AssetError["UNAUTHORIZED_ACCESS"] = "UNAUTHORIZED_ACCESS";
-})(AssetError || (exports.AssetError = AssetError = {}));
+})(AssetError || (AssetError = {}));
