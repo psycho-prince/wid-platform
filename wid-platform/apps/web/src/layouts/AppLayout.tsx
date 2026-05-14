@@ -1,12 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import clsx from 'clsx';
-
 const navigation = [
-  { name: 'Dashboard', href: '/' },
-  { name: 'Asset Vault', href: '/assets' },
-  { name: 'Inheritance Rules', href: '/inheritance' },
-  { name: 'Account & Security', href: '/account' },
-  { name: 'Audit Log', href: '/audit' }, // Add Audit Log link
+  { name: 'Dashboard', href: '/app' },
+  { name: 'Asset Vault', href: '/app/assets' },
+  { name: 'Inheritance Rules', href: '/app/inheritance' },
+  { name: 'Account & Security', href: '/app/account' },
+  { name: 'Audit Log', href: '/app/audit' },
 ];
 
 const AppLayout = () => {
@@ -20,9 +19,10 @@ const AppLayout = () => {
               <li key={item.name}>
                 <NavLink
                   to={item.href}
-                  end={item.href === '/'}
+                  end={item.href === '/app'}
                   className={({ isActive }) =>
                     clsx(
+...
                       'block rounded-md px-3 py-2 text-base font-medium',
                       isActive ? 'bg-gray-900' : 'hover:bg-gray-700'
                     )

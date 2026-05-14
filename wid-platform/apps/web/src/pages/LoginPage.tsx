@@ -20,7 +20,7 @@ const LoginPage = () => {
     mutationFn: (data: LoginUserRequestSchema) => api.post('/auth/login', data),
     onSuccess: (response) => {
       localStorage.setItem('token', response.accessToken); // Use accessToken from AuthResponse
-      navigate('/');
+      navigate('/app');
     },
     onError: (error) => {
       // Handle error based on AuthError enum (if API sends it)
