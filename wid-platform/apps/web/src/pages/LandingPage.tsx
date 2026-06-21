@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-// 3D Glass Vault Cube Visualizer
+// 3D Glass Vault Cube
 const ThreeDVault: React.FC = () => {
   const [vaultState, setVaultState] = useState<'locked' | 'encrypting' | 'unlocked'>('locked');
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [rotation, setRotation] = useState(0);
 
-  // Auto-rotate when not hovered
   useEffect(() => {
     if (isHovered) return;
     const interval = setInterval(() => {
@@ -19,8 +18,8 @@ const ThreeDVault: React.FC = () => {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
     setCoords({ x, y });
   };
 
@@ -36,7 +35,6 @@ const ThreeDVault: React.FC = () => {
     return 'from-emerald-400 via-teal-400 to-emerald-600 shadow-emerald-500/40';
   };
 
-  // Expand panel distance when unlocked
   const translateDist = vaultState === 'unlocked' ? '135px' : '90px';
 
   return (
@@ -57,7 +55,6 @@ const ThreeDVault: React.FC = () => {
         }}
         className="relative w-64 h-64 flex items-center justify-center cursor-grab active:cursor-grabbing perspective-1000"
       >
-        {/* 3D Cube Container */}
         <div 
           className="w-44 h-44 relative preserve-3d transition-transform duration-300 ease-out"
           style={{ 
@@ -66,10 +63,8 @@ const ThreeDVault: React.FC = () => {
               : `rotateY(${rotation}deg) rotateX(15deg)` 
           }}
         >
-          {/* Glowing Inner Core */}
           <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-gradient-to-tr ${getCoreColor()} opacity-80 blur-md animate-pulse shadow-lg transition-all duration-500`} />
           
-          {/* Floating Key Graphic */}
           <div 
             className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl transition-all duration-700 preserve-3d ${vaultState === 'unlocked' ? 'scale-130 translate-y-[-24px] rotate-12' : ''}`}
             style={{ transform: 'translateZ(0px)' }}
@@ -77,89 +72,43 @@ const ThreeDVault: React.FC = () => {
             {vaultState === 'locked' ? '🔐' : vaultState === 'encrypting' ? '⏳' : '🔑'}
           </div>
 
-          {/* Cube Faces */}
-          {/* Front Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">FRONT</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">AES-256</span>
           </div>
-          
-          {/* Back Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `rotateY(180deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `rotateY(180deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">BACK</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">ZERO-TR</span>
           </div>
-
-          {/* Right Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `rotateY(90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `rotateY(90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">RIGHT</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">SHARDS</span>
           </div>
-
-          {/* Left Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `rotateY(-90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `rotateY(-90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">LEFT</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">SHARDS</span>
           </div>
-
-          {/* Top Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `rotateX(90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `rotateX(90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">TOP</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">GCM-IV</span>
           </div>
-
-          {/* Bottom Face */}
-          <div 
-            className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`}
-            style={{ transform: `rotateX(-90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}
-          >
+          <div className={`absolute inset-0 border rounded-xl flex flex-col items-center justify-center backdrop-blur-md transition-all duration-500 border-dashed ${getBorderColor()}`} style={{ transform: `rotateX(-90deg) translateZ(${translateDist})`, backfaceVisibility: 'hidden' }}>
             <span className="text-[10px] font-mono tracking-widest text-slate-500/80 uppercase font-bold">BOTTOM</span>
             <span className="text-xs font-semibold text-slate-300 mt-1">PBKDF2</span>
           </div>
         </div>
       </div>
 
-      {/* Vault Controls */}
       <div className="grid grid-cols-3 gap-2.5 mt-8 w-full relative z-10">
-        <button 
-          onClick={() => setVaultState('locked')} 
-          className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'locked' ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-        >
-          🔒 Locked
-        </button>
-        <button 
-          onClick={() => setVaultState('encrypting')} 
-          className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'encrypting' ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-        >
-          ⚠️ Warning
-        </button>
-        <button 
-          onClick={() => setVaultState('unlocked')} 
-          className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'unlocked' ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}
-        >
-          🔓 Release
-        </button>
+        <button onClick={() => setVaultState('locked')} className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'locked' ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}>🔒 Locked</button>
+        <button onClick={() => setVaultState('encrypting')} className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'encrypting' ? 'bg-amber-600 border-amber-500 text-white shadow-lg shadow-amber-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}>⚠️ Alert</button>
+        <button onClick={() => setVaultState('unlocked')} className={`px-3 py-2 text-xs font-bold rounded-xl border transition-all duration-300 cursor-pointer ${vaultState === 'unlocked' ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'}`}>🔓 Release</button>
       </div>
     </div>
   );
 };
 
-// 3D Card Hover Feature wrapper
+// 3D Card Hover Wrapper
 const FeatureCard3D: React.FC<{ icon: string; title: string; description: string }> = ({ icon, title, description }) => {
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [hover, setHover] = useState(false);
@@ -193,110 +142,8 @@ const FeatureCard3D: React.FC<{ icon: string; title: string; description: string
   );
 };
 
-// Client Encryption Sandbox
-const EncryptedSandbox: React.FC = () => {
-  const [plaintext, setPlaintext] = useState('');
-  const [ciphertext, setCiphertext] = useState('');
-  const [status, setStatus] = useState<'idle' | 'encrypting' | 'encrypted' | 'uploaded'>('idle');
-
-  const handleEncrypt = () => {
-    if (!plaintext) return;
-    setStatus('encrypting');
-    setCiphertext('');
-    
-    // Simulate cryptographic matrix shuffle text typing
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    const targetCipher = 'U2FsdGVkX19' + btoa(plaintext).substring(0, 30) + '==';
-    let currentLength = 0;
-    
-    const timer = setInterval(() => {
-      currentLength += 2;
-      const randomPart = Array.from({ length: targetCipher.length - currentLength }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      setCiphertext(targetCipher.substring(0, currentLength) + randomPart);
-      
-      if (currentLength >= targetCipher.length) {
-        clearInterval(timer);
-        setCiphertext(targetCipher);
-        setStatus('encrypted');
-      }
-    }, 40);
-  };
-
-  const handleUpload = () => {
-    setStatus('uploaded');
-    setTimeout(() => {
-      setStatus('idle');
-      setPlaintext('');
-      setCiphertext('');
-    }, 3000);
-  };
-
-  return (
-    <div className="p-8 bg-slate-900/40 border border-slate-800/80 rounded-3xl backdrop-blur-xl relative overflow-hidden flex flex-col justify-between h-full shadow-2xl">
-      <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
-      <div>
-        <h3 className="text-2xl font-bold text-white tracking-tight mb-2">Zero-Trust Local Sandbox</h3>
-        <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-          Test the browser-side encryption algorithm. Your text is compiled into a high-security ciphertext payload BEFORE reaching any network layers.
-        </p>
-        
-        <div className="space-y-5">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 font-mono">1. Plaintext Secret Entry</label>
-            <textarea
-              value={plaintext}
-              onChange={(e) => setPlaintext(e.target.value)}
-              placeholder="Enter sensitive keys, logins, recovery documents, or a final note..."
-              className="w-full h-24 bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-blue-500/50 transition-all resize-none font-sans"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 font-mono">2. Local AES-256-GCM Output</label>
-            <div className="w-full h-24 bg-slate-950/80 border border-slate-800/80 rounded-2xl px-4 py-3 text-xs text-cyan-400/90 font-mono break-all overflow-y-auto selection:bg-cyan-500/20 selection:text-cyan-200 shadow-inner">
-              {ciphertext ? (
-                <span className="animate-matrix-glow">{ciphertext}</span>
-              ) : (
-                <span className="text-slate-700 italic">No cryptographic data generated. Write something above to start.</span>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <button
-          onClick={handleEncrypt}
-          disabled={!plaintext || status === 'encrypting'}
-          className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl text-sm font-bold border border-blue-500/30 transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/10"
-        >
-          {status === 'encrypting' ? '🔑 Compiling Cipher...' : '🔒 Encrypt Locally'}
-        </button>
-        
-        <button
-          onClick={handleUpload}
-          disabled={status !== 'encrypted'}
-          className="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          🚀 Dispatch Shard
-        </button>
-      </div>
-
-      {status === 'uploaded' && (
-        <div className="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center text-center p-6 animate-fade-in z-20">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center text-2xl mb-4 text-emerald-400 animate-bounce">✓</div>
-          <h4 className="text-xl font-bold text-white">Transmission Successful</h4>
-          <p className="text-slate-400 text-xs max-w-xs mt-2 leading-relaxed font-medium">
-            Local encryption finalized. Key shard uploaded to the zero-trust cluster. Decryption keys remain locally isolated under user control.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Dead Man's Switch Simulator
-const DeadMansSwitchSimulator: React.FC = () => {
+// Playground Tab: Switch Simulator
+const SwitchSimulator: React.FC = () => {
   const [secondsLeft, setSecondsLeft] = useState(8);
   const [isRunning, setIsRunning] = useState(false);
   const [stage, setStage] = useState(0);
@@ -352,92 +199,528 @@ const DeadMansSwitchSimulator: React.FC = () => {
       if (currentStage === 4) return 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400';
       return 'bg-blue-500/10 border-blue-500/40 text-blue-400';
     }
-    return 'bg-slate-950/40 border-slate-800/80 text-slate-600';
+    return 'bg-slate-950/40 border-slate-900/80 text-slate-600';
   };
 
   return (
-    <div className="p-8 bg-slate-900/30 border border-slate-800/80 rounded-3xl backdrop-blur-xl shadow-2xl">
-      <h3 className="text-3xl font-extrabold text-white tracking-tight mb-3">Dead Man's Switch Engine</h3>
-      <p className="text-slate-400 text-sm mb-8 leading-relaxed max-w-3xl">
-        Observe the automated release sequence in real time. Simulate a heartbeat timeout to watch the multi-stage security verification and cryptographic transmission pipeline activate.
-      </p>
-
-      <div className="grid md:grid-cols-2 gap-8 items-stretch">
-        {/* Timer Panel */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div className="text-center py-6">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold block mb-2">Simulated Heartbeat Clock</span>
-            <div className="text-5xl font-black font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
-              00:00:0{secondsLeft}s
-            </div>
-            <span className={`inline-block mt-4 px-3.5 py-1 rounded-full text-xs font-bold font-mono border ${isRunning ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse' : secondsLeft === 0 ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
-              {isRunning ? '⏱️ Switch Countdown Active' : secondsLeft === 0 ? '🚨 Verification Triggered' : '🟢 Primed'}
-            </span>
+    <div className="grid md:grid-cols-2 gap-8 items-stretch h-full">
+      <div className="bg-slate-950/80 border border-slate-900 rounded-2xl p-6 flex flex-col justify-between text-left">
+        <div className="text-center py-4">
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold block mb-2">Simulated Heartbeat Clock</span>
+          <div className="text-5xl font-black font-mono tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+            00:00:0{secondsLeft}s
           </div>
+          <span className={`inline-block mt-4 px-3.5 py-1 rounded-full text-[10px] font-bold font-mono border ${isRunning ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse' : secondsLeft === 0 ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'}`}>
+            {isRunning ? '⏱️ Switch Countdown Active' : secondsLeft === 0 ? '🚨 Verification Triggered' : '🟢 Primed'}
+          </span>
+        </div>
 
-          <div className="space-y-3 mt-4">
-            {!isRunning && secondsLeft !== 0 ? (
-              <button
-                onClick={handleStartSimulation}
-                className="w-full py-3.5 bg-red-600/90 hover:bg-red-700 text-white rounded-xl text-sm font-bold border border-red-500/30 transition duration-200 cursor-pointer shadow-lg shadow-red-500/10"
-              >
-                🛑 Stop Heartbeat (Simulate Loss)
-              </button>
-            ) : (
-              <button
-                onClick={handleExtendHeartbeat}
-                disabled={secondsLeft === 0}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold border border-blue-500/30 transition duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/10"
-              >
-                ⚡ Send Heartbeat (Reset Switch)
-              </button>
-            )}
-            {secondsLeft === 0 && (
-              <button
-                onClick={handleStartSimulation}
-                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-sm font-bold transition duration-200 cursor-pointer"
-              >
-                🔄 Restart Simulation
-              </button>
+        <div className="space-y-3">
+          {!isRunning && secondsLeft !== 0 ? (
+            <button
+              onClick={handleStartSimulation}
+              className="w-full py-3.5 bg-red-600/90 hover:bg-red-700 text-white rounded-xl text-sm font-bold border border-red-500/30 transition duration-200 cursor-pointer shadow-lg shadow-red-500/10"
+            >
+              🛑 Stop Heartbeat (Simulate Loss)
+            </button>
+          ) : (
+            <button
+              onClick={handleExtendHeartbeat}
+              disabled={secondsLeft === 0}
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold border border-blue-500/30 transition duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-blue-500/10"
+            >
+              ⚡ Send Heartbeat (Reset Switch)
+            </button>
+          )}
+          {secondsLeft === 0 && (
+            <button
+              onClick={handleStartSimulation}
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 rounded-xl text-sm font-bold transition duration-200 cursor-pointer"
+            >
+              🔄 Restart Simulation
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-slate-950/80 border border-slate-900 rounded-2xl p-6 flex flex-col justify-between text-left">
+        <div>
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold block mb-4">Diagnostics console ledger</span>
+          <div className="space-y-3 font-mono text-[10px] leading-relaxed max-h-36 overflow-y-auto pr-2">
+            {logs.map((log, index) => (
+              <div key={index} className="text-cyan-400/90 border-l border-cyan-700/60 pl-3">
+                {log}
+              </div>
+            ))}
+            {logs.length === 0 && (
+              <div className="text-slate-700 italic">Console idle. Stop the heartbeat to monitor checkpoints.</div>
             )}
           </div>
         </div>
 
-        {/* Console Log */}
-        <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold block mb-4">Diagnostics console ledger</span>
-            <div className="space-y-3 font-mono text-[10px] leading-relaxed max-h-40 overflow-y-auto pr-2">
-              {logs.map((log, index) => (
-                <div key={index} className="text-cyan-400/90 border-l border-cyan-700/60 pl-3">
-                  {log}
-                </div>
-              ))}
-              {logs.length === 0 && (
-                <div className="text-slate-700 italic">Console idle. Stop the heartbeat to monitor security checkpoints.</div>
-              )}
+        <div className="grid grid-cols-4 gap-2 mt-4">
+          <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(1)}`}>
+            <div className="mb-0.5 font-mono">S1</div>
+            <div>Timeout</div>
+          </div>
+          <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(2)}`}>
+            <div className="mb-0.5 font-mono">S2</div>
+            <div>Guardian</div>
+          </div>
+          <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(3)}`}>
+            <div className="mb-0.5 font-mono">S3</div>
+            <div>Combine</div>
+          </div>
+          <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(4)}`}>
+            <div className="mb-0.5 font-mono">S4</div>
+            <div>Dispatch</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Playground Tab: Local Encrypted Sandbox
+const EncryptedSandbox: React.FC = () => {
+  const [plaintext, setPlaintext] = useState('');
+  const [ciphertext, setCiphertext] = useState('');
+  const [status, setStatus] = useState<'idle' | 'encrypting' | 'encrypted' | 'uploaded'>('idle');
+
+  const handleEncrypt = () => {
+    if (!plaintext) return;
+    setStatus('encrypting');
+    setCiphertext('');
+    
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    const targetCipher = 'U2FsdGVkX19' + btoa(plaintext).substring(0, 30) + '==';
+    let currentLength = 0;
+    
+    const timer = setInterval(() => {
+      currentLength += 2;
+      const randomPart = Array.from({ length: targetCipher.length - currentLength }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      setCiphertext(targetCipher.substring(0, currentLength) + randomPart);
+      
+      if (currentLength >= targetCipher.length) {
+        clearInterval(timer);
+        setCiphertext(targetCipher);
+        setStatus('encrypted');
+      }
+    }, 40);
+  };
+
+  const handleUpload = () => {
+    setStatus('uploaded');
+    setTimeout(() => {
+      setStatus('idle');
+      setPlaintext('');
+      setCiphertext('');
+    }, 3000);
+  };
+
+  return (
+    <div className="grid md:grid-cols-2 gap-8 items-stretch h-full text-left">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 font-mono">1. Plaintext Secret Entry</label>
+          <textarea
+            value={plaintext}
+            onChange={(e) => setPlaintext(e.target.value)}
+            placeholder="Enter sensitive keys, logins, recovery documents, or a final note..."
+            className="w-full h-32 bg-slate-950/80 border border-slate-900 rounded-2xl px-4 py-3 text-sm text-slate-100 placeholder-slate-700 focus:outline-none focus:border-blue-500/50 transition-all resize-none font-sans"
+          />
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={handleEncrypt}
+            disabled={!plaintext || status === 'encrypting'}
+            className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl text-xs font-bold border border-blue-500/30 transition-all duration-300 cursor-pointer disabled:opacity-40 shadow-lg shadow-blue-500/10"
+          >
+            {status === 'encrypting' ? '🔒 Encrypting...' : '🔒 Encrypt Locally'}
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-slate-950/80 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
+        <div>
+          <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5 font-mono">2. Local AES-256-GCM Output</label>
+          <div className="w-full h-28 bg-slate-900/40 border border-slate-800/80 rounded-xl px-4 py-3 text-xs text-cyan-400/90 font-mono break-all overflow-y-auto selection:bg-cyan-500/20 selection:text-cyan-200 shadow-inner">
+            {ciphertext ? (
+              <span className="animate-matrix-glow">{ciphertext}</span>
+            ) : (
+              <span className="text-slate-700 italic">No cryptographic data generated. Write something on the left.</span>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={handleUpload}
+          disabled={status !== 'encrypted'}
+          className="w-full py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer disabled:opacity-40"
+        >
+          🚀 Dispatch Encrypted Shard
+        </button>
+
+        {status === 'uploaded' && (
+          <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center text-center p-6 animate-fade-in z-20">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xl mb-3 text-emerald-400 animate-bounce">✓</div>
+            <h4 className="text-base font-bold text-white">Transmission Successful</h4>
+            <p className="text-slate-400 text-[10px] max-w-xs mt-1.5 leading-relaxed font-medium">
+              Local encryption finalized. Key shard uploaded to the zero-trust cluster. Decryption keys remain locally isolated under user control.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Playground Tab: Shamir's Sharding Visualizer
+const KeyShardingVisualizer: React.FC = () => {
+  const [isSplit, setIsSplit] = useState(false);
+  const [animating, setAnimating] = useState(false);
+
+  const handleAction = () => {
+    setAnimating(true);
+    setTimeout(() => {
+      setIsSplit(!isSplit);
+      setAnimating(false);
+    }, 1200);
+  };
+
+  return (
+    <div className="grid md:grid-cols-2 gap-8 items-stretch h-full text-left">
+      <div className="flex flex-col justify-between py-1">
+        <div>
+          <h4 className="text-sm font-bold text-white mb-2">Cryptographic Shard Distribution</h4>
+          <p className="text-slate-400 text-xs leading-relaxed mb-4">
+            Shamir's Secret Sharing mathematically splits your private master password key into three unique shares. No single shard contains any readable payload info.
+          </p>
+          <ul className="space-y-2 text-[10px] text-slate-500 font-mono">
+            <li>• Threshold: 2 of 3 shards required to reconstruct.</li>
+            <li>• Storage: Stored on isolated hardware nodes.</li>
+            <li>• Decryption: Combined client-side upon verified trigger.</li>
+          </ul>
+        </div>
+        <button
+          onClick={handleAction}
+          disabled={animating}
+          className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl text-xs font-bold border border-blue-500/30 transition-all duration-300 cursor-pointer disabled:opacity-50"
+        >
+          {animating ? "🧬 Processing..." : isSplit ? "🔓 Reconstruct Master Key" : "🧬 Split & Distribute Key Shards"}
+        </button>
+      </div>
+
+      <div className="relative bg-slate-950/80 border border-slate-900 rounded-2xl flex items-center justify-center overflow-hidden h-64 md:h-auto min-h-[220px]">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+          <line x1="50%" y1="50%" x2="25%" y2="28%" stroke={isSplit ? "#3b82f6" : "#1e293b"} strokeWidth="1.5" className={animating ? "animate-pulse" : ""} />
+          <line x1="50%" y1="50%" x2="75%" y2="28%" stroke={isSplit ? "#3b82f6" : "#1e293b"} strokeWidth="1.5" className={animating ? "animate-pulse" : ""} />
+          <line x1="50%" y1="50%" x2="50%" y2="72%" stroke={isSplit ? "#3b82f6" : "#1e293b"} strokeWidth="1.5" className={animating ? "animate-pulse" : ""} />
+        </svg>
+
+        {/* Central Key */}
+        <div className={`absolute z-10 w-12 h-12 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-lg transition-all duration-700 ${isSplit ? "opacity-15 scale-75" : "scale-100 shadow-lg shadow-blue-500/20"}`}>
+          🔑
+        </div>
+
+        {/* Node A (Top Left) */}
+        <div className="absolute top-[18%] left-[16%] flex flex-col items-center">
+          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold font-mono transition-all duration-700 ${isSplit ? "bg-blue-950/80 border-blue-500 text-blue-400 shadow-md shadow-blue-500/10" : "bg-slate-900 border-slate-800 text-slate-600"}`}>
+            {isSplit ? "🧬 A" : "⬡"}
+          </div>
+          <span className="text-[8px] text-slate-500 mt-1 font-mono">Node Alpha</span>
+        </div>
+
+        {/* Node B (Top Right) */}
+        <div className="absolute top-[18%] right-[16%] flex flex-col items-center">
+          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold font-mono transition-all duration-700 ${isSplit ? "bg-cyan-950/80 border-cyan-500 text-cyan-400 shadow-md shadow-cyan-500/10" : "bg-slate-900 border-slate-800 text-slate-600"}`}>
+            {isSplit ? "🧬 B" : "⬡"}
+          </div>
+          <span className="text-[8px] text-slate-500 mt-1 font-mono">Node Beta</span>
+        </div>
+
+        {/* Node C (Bottom Center) */}
+        <div className="absolute bottom-[16%] left-1/2 -translate-x-1/2 flex flex-col items-center">
+          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-bold font-mono transition-all duration-700 ${isSplit ? "bg-purple-950/80 border-purple-500 text-purple-400 shadow-md shadow-purple-500/10" : "bg-slate-900 border-slate-800 text-slate-600"}`}>
+            {isSplit ? "🧬 C" : "⬡"}
+          </div>
+          <span className="text-[8px] text-slate-500 mt-1 font-mono">Node Gamma</span>
+        </div>
+
+        {animating && (
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center text-xs text-blue-400 font-mono font-bold animate-pulse">
+            🧬 RECONSTRUCTING SHARES...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Playground Tab: Cryptographic Audit Scanner
+const AuditLedgerInspector: React.FC = () => {
+  const [step, setStep] = useState<number>(0);
+  const [status, setStatus] = useState<'idle' | 'scanning' | 'complete'>('idle');
+
+  const handleAudit = () => {
+    setStatus('scanning');
+    setStep(0);
+    
+    setTimeout(() => setStep(1), 1000);
+    setTimeout(() => setStep(2), 2200);
+    setTimeout(() => setStep(3), 3400);
+    setTimeout(() => {
+      setStatus('complete');
+    }, 4500);
+  };
+
+  const blocks = [
+    {
+      id: "Block #9021",
+      action: "USER_REGISTERED",
+      hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      prevHash: "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      id: "Block #9022",
+      action: "VAULT_CREATED",
+      hash: "8c7d8e2f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d",
+      prevHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      id: "Block #9023",
+      action: "SHARD_DISPATCHED",
+      hash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+      prevHash: "8c7d8e2f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d"
+    }
+  ];
+
+  return (
+    <div className="grid md:grid-cols-2 gap-8 items-stretch h-full text-left">
+      <div className="flex flex-col justify-between py-1">
+        <div>
+          <h4 className="text-sm font-bold text-white mb-2">Cryptographic Ledger Chain</h4>
+          <p className="text-slate-400 text-xs leading-relaxed mb-4">
+            Validation requests, vault creations, and audit records are signed and chained. Modifying any block breaks the chronological hash link.
+          </p>
+          <div className="p-3 bg-slate-900/60 border border-slate-900 rounded-xl text-[10px] font-mono text-slate-500 leading-relaxed">
+            Hash format: SHA-256 recursive checksum pointer tracking.
+          </div>
+        </div>
+        <button
+          onClick={handleAudit}
+          disabled={status === 'scanning'}
+          className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl text-xs font-bold border border-blue-500/30 transition-all duration-300 cursor-pointer disabled:opacity-50 shadow-lg shadow-blue-500/10"
+        >
+          {status === 'scanning' ? "⚡ Calculating Hashes..." : "🔎 Validate Ledger Chain"}
+        </button>
+      </div>
+
+      <div className="space-y-2.5 font-mono text-[9px] flex flex-col justify-center">
+        {blocks.map((block, idx) => {
+          const isScanned = step > idx || status === 'complete';
+          const isScanning = status === 'scanning' && step === idx;
+          return (
+            <div 
+              key={block.id} 
+              className={`p-3 rounded-xl border transition-all duration-300 ${
+                isScanned 
+                  ? "bg-emerald-950/10 border-emerald-500/30 text-emerald-300"
+                  : isScanning 
+                    ? "bg-blue-950/25 border-blue-500/40 text-blue-400 animate-pulse"
+                    : "bg-slate-900/10 border-slate-900 text-slate-600"
+              }`}
+            >
+              <div className="flex justify-between items-center mb-1 font-bold">
+                <span>{block.id} • {block.action}</span>
+                <span className={`px-2 py-0.5 rounded text-[8px] font-bold border uppercase tracking-wider ${
+                  isScanned 
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : isScanning 
+                      ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                      : "bg-slate-950 border-slate-900 text-slate-700"
+                }`}>
+                  {isScanned ? "Verified" : isScanning ? "Checking..." : "Queued"}
+                </span>
+              </div>
+              <div className="truncate mt-1 text-[8px] text-slate-500">Hash: {block.hash}</div>
+              <div className="truncate text-[8px] text-slate-550">Prev: {block.prevHash}</div>
             </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Playground Tab: Interactive Will Architect
+const LegacyPlannerWizard: React.FC = () => {
+  const [step, setStep] = useState(1);
+  const [includeCrypto, setIncludeCrypto] = useState(true);
+  const [includeWills, setIncludeWills] = useState(true);
+  const [includeSocial, setIncludeSocial] = useState(false);
+  const [beneficiaries, setBeneficiaries] = useState<string[]>(['Eleanor']);
+  const [interval, setIntervalVal] = useState(30);
+
+  const addBeneficiary = () => {
+    if (beneficiaries.length < 3) {
+      setBeneficiaries([...beneficiaries, beneficiaries.length === 1 ? 'Charles' : 'Sarah']);
+    }
+  };
+
+  const removeBeneficiary = () => {
+    if (beneficiaries.length > 1) {
+      setBeneficiaries(beneficiaries.slice(0, -1));
+    }
+  };
+
+  const getConnectionsCount = () => {
+    let count = 0;
+    if (includeCrypto) count++;
+    if (includeWills) count++;
+    if (includeSocial) count++;
+    return count;
+  };
+
+  return (
+    <div className="grid md:grid-cols-2 gap-8 items-stretch h-full text-left">
+      <div className="flex flex-col justify-between py-1">
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest font-mono">Will Architect</span>
+            <span className="text-[10px] text-slate-550 font-bold font-mono">Step {step} of 3</span>
           </div>
 
-          {/* Stage Indicators */}
-          <div className="grid grid-cols-4 gap-2 mt-6">
-            <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(1)}`}>
-              <div className="mb-0.5 font-mono">S1</div>
-              <div>Timeout</div>
+          {step === 1 && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-white">Select Assets to Protect</h4>
+              <div className="space-y-2 text-xs text-slate-300">
+                <label className="flex items-center gap-3 p-2.5 bg-slate-900/50 border border-slate-900 rounded-xl cursor-pointer hover:border-blue-500/20">
+                  <input type="checkbox" checked={includeCrypto} onChange={() => setIncludeCrypto(!includeCrypto)} className="rounded bg-slate-950 border-slate-800 text-blue-500 focus:ring-0" />
+                  <span>Cryptocurrency Seed Keys</span>
+                </label>
+                <label className="flex items-center gap-3 p-2.5 bg-slate-900/50 border border-slate-900 rounded-xl cursor-pointer hover:border-blue-500/20">
+                  <input type="checkbox" checked={includeWills} onChange={() => setIncludeWills(!includeWills)} className="rounded bg-slate-950 border-slate-800 text-blue-500 focus:ring-0" />
+                  <span>Legal Family Will PDFs</span>
+                </label>
+                <label className="flex items-center gap-3 p-2.5 bg-slate-900/50 border border-slate-900 rounded-xl cursor-pointer hover:border-blue-500/20">
+                  <input type="checkbox" checked={includeSocial} onChange={() => setIncludeSocial(!includeSocial)} className="rounded bg-slate-950 border-slate-800 text-blue-500 focus:ring-0" />
+                  <span>Master Login Credentials</span>
+                </label>
+              </div>
             </div>
-            <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(2)}`}>
-              <div className="mb-0.5 font-mono">S2</div>
-              <div>Guardian</div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-white">Add Beneficiaries</h4>
+              <p className="text-slate-550 text-[10px] leading-relaxed">Add designated heirs to map vault allocation links.</p>
+              <div className="space-y-2">
+                {beneficiaries.map((heir, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-2.5 bg-slate-900/50 border border-slate-900 rounded-xl text-xs text-white">
+                    <span>👤 {heir}</span>
+                    <span className="font-mono text-blue-400 font-bold">{(100 / beneficiaries.length).toFixed(0)}% share</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={addBeneficiary} disabled={beneficiaries.length >= 3} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 rounded-lg cursor-pointer disabled:opacity-40">
+                  + Add Heir
+                </button>
+                <button onClick={removeBeneficiary} disabled={beneficiaries.length <= 1} className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 rounded-lg cursor-pointer disabled:opacity-40">
+                  - Remove
+                </button>
+              </div>
             </div>
-            <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(3)}`}>
-              <div className="mb-0.5 font-mono">S3</div>
-              <div>Combine</div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-bold text-white">Heartbeat Duration</h4>
+              <p className="text-slate-550 text-[10px] leading-relaxed">Define how many days of total inactivity triggers the release sequence.</p>
+              
+              <div className="space-y-3 pt-2">
+                <input 
+                  type="range" 
+                  min="30" 
+                  max="365" 
+                  value={interval} 
+                  onChange={(e) => setIntervalVal(Number(e.target.value))} 
+                  className="w-full bg-slate-900 h-1.5 rounded-lg appearance-none cursor-pointer accent-blue-500" 
+                />
+                <div className="flex justify-between text-xs font-mono font-bold text-blue-400">
+                  <span>Inactivity Limit:</span>
+                  <span>{interval} Days</span>
+                </div>
+              </div>
             </div>
-            <div className={`border rounded-lg p-2 text-center text-[9px] font-bold transition-all duration-300 ${getStageStyle(4)}`}>
-              <div className="mb-0.5 font-mono">S4</div>
-              <div>Dispatch</div>
-            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2 pt-4">
+          <button 
+            onClick={() => setStep(prev => Math.max(1, prev - 1))} 
+            disabled={step === 1}
+            className="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-400 rounded-lg text-xs font-bold cursor-pointer disabled:opacity-40"
+          >
+            Back
+          </button>
+          {step < 3 ? (
+            <button 
+              onClick={() => setStep(prev => Math.min(3, prev + 1))} 
+              className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold border border-blue-500/30 cursor-pointer"
+            >
+              Continue
+            </button>
+          ) : (
+            <Link 
+              to="/register" 
+              className="flex-1 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-lg text-xs font-bold border border-blue-500/30 text-center cursor-pointer flex items-center justify-center shadow-lg shadow-blue-500/10"
+            >
+              Initialize Vault
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-slate-950/80 border border-slate-905 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden min-h-[220px]">
+        <span className="text-[9px] text-slate-550 uppercase tracking-widest font-mono font-bold block mb-2">Live Node Architecture</span>
+        
+        <div className="flex-1 relative flex items-center justify-center">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+            {includeCrypto && <line x1="50%" y1="50%" x2="25%" y2="28%" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3" className="animate-[pulse_1.5s_infinite]" />}
+            {includeWills && <line x1="50%" y1="50%" x2="75%" y2="28%" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3" className="animate-[pulse_1.5s_infinite]" />}
+            {includeSocial && <line x1="50%" y1="50%" x2="50%" y2="22%" stroke="#3b82f6" strokeWidth="1.5" strokeDasharray="3" className="animate-[pulse_1.5s_infinite]" />}
+
+            {beneficiaries.map((_, idx) => {
+              const xVal = beneficiaries.length === 1 ? 50 : beneficiaries.length === 2 ? 30 + idx * 40 : 20 + idx * 30;
+              return (
+                <line key={idx} x1="50%" y1="50%" x2={`${xVal}%`} y2="78%" stroke="#10b981" strokeWidth="1.5" />
+              );
+            })}
+          </svg>
+
+          <div className="absolute w-9 h-9 rounded-full bg-blue-600 border border-blue-400 flex items-center justify-center text-[10px] shadow-lg shadow-blue-500/20 z-10 font-bold font-mono">
+            WID
           </div>
+
+          {includeCrypto && <div className="absolute top-[18%] left-[16%] w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shadow-md z-10" title="Crypto Seed">₿</div>}
+          {includeWills && <div className="absolute top-[18%] right-[16%] w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shadow-md z-10" title="PDF Will">📄</div>}
+          {includeSocial && <div className="absolute top-[10%] left-[42%] w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs shadow-md z-10" title="Credential">🔑</div>}
+
+          {beneficiaries.map((heir, idx) => {
+            const xStyle = beneficiaries.length === 1 ? 'left-[42%]' : beneficiaries.length === 2 ? (idx === 0 ? 'left-[22%]' : 'right-[22%]') : (idx === 0 ? 'left-[12%]' : idx === 1 ? 'left-[42%]' : 'right-[12%]');
+            return (
+              <div key={idx} className={`absolute bottom-[14%] ${xStyle} w-8 h-8 rounded-full bg-emerald-950 border border-emerald-500 flex items-center justify-center text-[10px] font-bold text-emerald-400 shadow-md z-10`} title={heir}>
+                {heir.substring(0, 1)}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="text-[8px] text-slate-500 text-center font-mono leading-relaxed mt-2 border-t border-slate-900/60 pt-2">
+          Switch: {interval}d timer • {getConnectionsCount()} assets sharded • {beneficiaries.length} heir pathways.
         </div>
       </div>
     </div>
@@ -474,7 +757,6 @@ const TimelineSection: React.FC = () => {
     <div className="py-12">
       <h3 className="text-3xl font-extrabold text-white text-center mb-10 tracking-tight">Vault Transmission Lifecycle</h3>
       <div className="max-w-4xl mx-auto px-4">
-        {/* Horizontal dot line */}
         <div className="relative flex justify-between items-center mb-10">
           <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-900 -translate-y-1/2 z-0" />
           <div 
@@ -499,7 +781,6 @@ const TimelineSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Active Step Content */}
         <div className="bg-slate-900/30 border border-slate-800/80 rounded-3xl p-8 backdrop-blur-xl relative min-h-48 flex flex-col justify-between transition-all duration-300 hover:border-slate-800 shadow-xl">
           <div>
             <h4 className="text-xl font-bold text-white mb-3">{steps[activeStep].title}</h4>
@@ -576,10 +857,20 @@ const FAQAccordion: React.FC = () => {
 
 // Main Landing Page
 const LandingPage: React.FC = () => {
+  const [activePlaygroundTab, setActivePlaygroundTab] = useState<'switch' | 'encrypt' | 'sharding' | 'audit' | 'wizard'>('switch');
+
+  const playgroundTabs = [
+    { id: 'switch' as const, label: '⏱️ Dead Man\'s Switch' },
+    { id: 'encrypt' as const, label: '🔒 Client Sandbox' },
+    { id: 'sharding' as const, label: '🧬 Key Sharding' },
+    { id: 'audit' as const, label: '🔎 Ledger Audit' },
+    { id: 'wizard' as const, label: '👤 Will Architect' },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-blue-500 selection:text-white relative overflow-x-hidden">
       
-      {/* Background glow grids */}
+      {/* Background grids & glows */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-3xl pointer-events-none" />
       <div className="absolute top-[40%] right-1/4 w-[700px] h-[700px] rounded-full bg-purple-600/5 blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full bg-cyan-600/5 blur-3xl pointer-events-none" />
@@ -602,8 +893,7 @@ const LandingPage: React.FC = () => {
             
             <div className="hidden md:flex space-x-8 text-sm font-semibold text-slate-400">
               <a href="#concept" className="hover:text-white transition">The Concept</a>
-              <a href="#simulator" className="hover:text-white transition">Live Engine</a>
-              <a href="#sandbox" className="hover:text-white transition">Local Sandbox</a>
+              <a href="#playground" className="hover:text-white transition">Security Playground</a>
               <a href="#features" className="hover:text-white transition">Security Safeguards</a>
             </div>
 
@@ -651,39 +941,42 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Dead Man's Switch Live Simulator Section */}
-      <section id="simulator" className="py-20 border-t border-slate-900 bg-slate-900/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <DeadMansSwitchSimulator />
-        </div>
-      </section>
+      {/* Interactive Security Playground */}
+      <section id="playground" className="py-20 border-t border-slate-900 bg-slate-900/10">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="space-y-4 mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Interactive Cryptographic Playground</h2>
+            <p className="text-slate-400 text-sm max-w-2xl mx-auto leading-relaxed">
+              Explore our core zero-trust protocols in real time. Select a tab below to run simulations for encryption, shard splits, and ledger chain audits.
+            </p>
+          </div>
 
-      {/* Local Encryption Sandbox Section */}
-      <section id="sandbox" className="py-20 border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <EncryptedSandbox />
+          <div className="glass-card rounded-3xl p-6 md:p-8 border border-slate-800/80 shadow-2xl relative">
+            
+            {/* Tab Bar Selector */}
+            <div className="flex flex-wrap gap-2 justify-center mb-8 border-b border-slate-900 pb-5">
+              {playgroundTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePlaygroundTab(tab.id)}
+                  className={`px-4 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-300 cursor-pointer border ${
+                    activePlaygroundTab === tab.id
+                      ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25'
+                      : 'bg-slate-900/50 border-slate-850 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <div className="space-y-6 text-left">
-              <h3 className="text-3xl font-extrabold text-white tracking-tight">Zero-Knowledge Cryptography</h3>
-              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-                Most platform backups are unsafe because server administrators hold the master keys. With our protocol, your browser encrypts all secrets locally. The server only receives encrypted blobs, which are impossible to decipher without your client key.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-950/40 text-blue-400 flex items-center justify-center font-bold text-xs mt-1 border border-blue-900/30">✓</div>
-                  <p className="text-slate-300 text-sm font-semibold">Local client key derivation using PBKDF2 with salt.</p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-950/40 text-blue-400 flex items-center justify-center font-bold text-xs mt-1 border border-blue-900/30">✓</div>
-                  <p className="text-slate-300 text-sm font-semibold">AES-256-GCM authenticated cipher blocks.</p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-full bg-blue-950/40 text-blue-400 flex items-center justify-center font-bold text-xs mt-1 border border-blue-900/30">✓</div>
-                  <p className="text-slate-300 text-sm font-semibold">Multi-shard key distribution: no single server holds the full secret.</p>
-                </div>
-              </div>
+
+            {/* Active Tab Panel */}
+            <div className="min-h-[300px]">
+              {activePlaygroundTab === 'switch' && <SwitchSimulator />}
+              {activePlaygroundTab === 'encrypt' && <EncryptedSandbox />}
+              {activePlaygroundTab === 'sharding' && <KeyShardingVisualizer />}
+              {activePlaygroundTab === 'audit' && <AuditLedgerInspector />}
+              {activePlaygroundTab === 'wizard' && <LegacyPlannerWizard />}
             </div>
           </div>
         </div>
@@ -736,7 +1029,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Protocol Features (Tilt Cards) */}
+      {/* Protocol Features */}
       <section id="features" className="py-20 border-t border-slate-900 bg-slate-900/10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
